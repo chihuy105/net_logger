@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,15 +10,21 @@ import 'network_event.dart';
 import 'network_logger.dart';
 
 class NetworkLoggerShake {
-  static attachTo(BuildContext context,
+  ShakeDetector? detector;
+
+  attachTo(BuildContext context,
       {List<String> baseUrls = const [], bool isHiddenBaseUrl = false}) {
-    ShakeDetector detector = ShakeDetector.waitForStart(
+    detector = ShakeDetector.waitForStart(
         // shakeThresholdGravity: 0.1,
         onPhoneShake: () {
       NetworkLoggerScreen.open(context,
           baseUrls: baseUrls, isHiddenBaseUrl: isHiddenBaseUrl);
     });
-    detector.startListening();
+    detector?.startListening();
+  }
+
+  removeListener() {
+    detector?.stopListening();
   }
 }
 
