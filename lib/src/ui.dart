@@ -644,6 +644,18 @@ class NetworkLoggerEventScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Log Entry'),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.copy),
+              onPressed: () {
+                if (event.request != null) {
+                  final curl =
+                      RequestToCurlConverter.requestToCurl(event.request!);
+                  Clipboard.setData(ClipboardData(text: curl));
+                }
+              },
+            ),
+          ],
           bottom: (bottom as PreferredSizeWidget?),
         ),
         body: Builder(
@@ -724,5 +736,37 @@ class _DebugOnly extends StatelessWidget {
       }
     }
     return child;
+  }
+}
+
+class RequestToCurlConverter {
+  static String requestToCurl(Request request) {
+    // Start building the cURL command
+    final List<String> curlCommand = ['curl'];
+
+    // Add the HTTP method
+    curlCommand.add('-X ${request.method}');
+
+    // Add the headers
+    if (request.headers.isNotEmpty) {
+      final headersString = request.headers.map((key, value) {
+        return '-H "$key: $value"';
+      }).join(' ');
+
+      curlCommand.add(headersString);
+    }
+
+    // Add the request data if it exists
+    if (request.data != null) {
+      final jsonData = json.encode(request.data);
+      curlCommand.add('-d \'$jsonData\'');
+    }
+
+    // Add the URI
+    curlCommand.add('\'${request.uri}\'');
+
+    // Join all parts into a single string
+    final curlString = curlCommand.join(' ');
+    return curlString;
   }
 }
